@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Mars Mission</title>
+<style>
+body {
+  background: #17152c;
+  color: white;
+  font-family: Arial;
+  text-align: center;
+  padding: 25px;
+}
+.container {
+  background: #302744;
+  padding: 25px;
+  border-radius: 18px;
+  max-width: 550px;
+  margin: auto;
+}
+h1 { color: #ff784e; }
+button {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  margin: 12px 0;
+  border: none;
+  border-radius: 10px;
+  background: #ff784e;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+button:hover { background: #e65d35; }
+#status { color: #b8f5c5; }
+</style>
+</head>
+<body>
+
+<div class="container">
+<h1>🚀 MARS MISSION</h1>
+<h3>Junior Astronaut Trainer</h3>
+
+<div id="game">
+<p>Welcome, Junior Astronaut!</p>
+<p>Your mission is to manage a Mars base.</p>
+<button onclick="startGame()">START MISSION</button>
+</div>
+
+<div id="status"></div>
+</div>
+
+<script>
+let score = 0;
+let level = 0;
+
+let missions = [
+{
+q: "Your Mars base needs electricity. What will you choose?",
+a: ["Solar Power", "Waste all battery power"],
+correct: 0,
+reason: "Solar panels can provide electrical power."
+},
+{
+q: "How will you grow food on Mars?",
+a: ["Use a controlled greenhouse", "Depend only on food delivery"],
+correct: 0,
+reason: "A greenhouse can support food production."
+},
+{
+q: "How will you protect astronauts from radiation?",
+a: ["Use suitable protective shielding", "Ignore radiation"],
+correct: 0,
+reason: "Radiation shielding helps protect astronauts."
+},
+{
+q: "What is important for astronaut life support?",
+a: ["Monitor air and water systems", "Ignore system conditions"],
+correct: 0,
+reason: "Life-support systems need continuous monitoring."
+}
+];
+
+function startGame() {
+score = 0;
+level = 0;
+showMission();
+}
+
+function showMission() {
+document.getElementById("status").innerHTML =
+"⭐ Score: " + score;
+
+if (level >= missions.length) {
+document.getElementById("game").innerHTML =
+"<h2>🎉 Mission Completed!</h2>" +
+"<h3>Your Score: " + score + "/4</h3>" +
+"<p>Great work, Junior Astronaut!</p>" +
+"<button onclick='startGame()'>PLAY AGAIN</button>";
+return;
+}
+
+let m = missions[level];
+
+document.getElementById("game").innerHTML =
+"<h3>Mission " + (level+1) + "</h3>" +
+"<p>" + m.q + "</p>" +
+m.a.map((answer,i) =>
+"<button onclick='choose(" + i + ")'>" +
+answer + "</button>"
+).join("");
+}
+
+function choose(choice) {
+let m = missions[level];
+
+if (choice === m.correct) {
+score++;
+alert("Correct! " + m.reason);
+} else {
+alert("Not quite! " + m.reason);
+}
+
+level++;
+showMission();
+}
+</script>
+
+</body>
+</html>
