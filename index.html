@@ -1,128 +1,314 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Mars Mission</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mars Mission 2.0</title>
+
 <style>
+* { box-sizing: border-box; }
+
 body {
-  background: #17152c;
+  margin: 0;
+  font-family: Arial, sans-serif;
   color: white;
-  font-family: Arial;
   text-align: center;
-  padding: 25px;
+  background:
+    radial-gradient(circle at 50% 20%, #bd6545, transparent 40%),
+    linear-gradient(160deg, #180e27, #562b36, #17152c);
+  min-height: 100vh;
+  padding: 20px;
 }
+
 .container {
-  background: #302744;
-  padding: 25px;
-  border-radius: 18px;
-  max-width: 550px;
+  max-width: 750px;
   margin: auto;
+  background: rgba(20,15,35,0.88);
+  padding: 22px;
+  border-radius: 20px;
 }
-h1 { color: #ff784e; }
+
+h1 { color: #ff9567; }
+
+.planet {
+  font-size: 75px;
+  margin: 10px;
+}
+
+.astronaut { font-size: 65px; }
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.stat {
+  background: #382d48;
+  padding: 13px;
+  border-radius: 12px;
+}
+
+.bar {
+  background: #171525;
+  height: 13px;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.fill {
+  height: 100%;
+  background: #65d89b;
+  transition: width 0.3s;
+}
+
 button {
-  display: block;
   width: 100%;
   padding: 14px;
-  margin: 12px 0;
+  margin: 7px 0;
   border: none;
   border-radius: 10px;
-  background: #ff784e;
+  background: #ff8057;
   color: white;
-  font-size: 16px;
+  font-size: 15px;
+  font-weight: bold;
   cursor: pointer;
 }
-button:hover { background: #e65d35; }
-#status { color: #b8f5c5; }
+
+button:hover { background: #e65c38; }
+
+.action {
+  background: #493653;
+  border: 1px solid #a47aab;
+}
+
+#message {
+  background: #29233c;
+  padding: 14px;
+  border-radius: 10px;
+  margin-top: 15px;
+}
+
+.small { color: #c9c1d7; }
+
 </style>
 </head>
+
 <body>
 
 <div class="container">
-<h1>🚀 MARS MISSION</h1>
-<h3>Junior Astronaut Trainer</h3>
 
-<div id="game">
-<p>Welcome, Junior Astronaut!</p>
-<p>Your mission is to manage a Mars base.</p>
-<button onclick="startGame()">START MISSION</button>
+<h1>🚀 MARS MISSION 2.0</h1>
+<h3>Junior Astronaut Survival Trainer</h3>
+
+<div class="planet">🔴</div>
+<div class="astronaut">👨‍🚀</div>
+
+<h2 id="day">Ready for Mission?</h2>
+
+<p class="small">
+Your mission: Survive 5 days on Mars!
+Manage your resources carefully.
+</p>
+
+<div class="stats">
+
+<div class="stat">
+🍎 Food: <span id="food">80</span>%
+<div class="bar"><div id="foodBar" class="fill"></div></div>
 </div>
 
-<div id="status"></div>
+<div class="stat">
+💧 Water: <span id="water">80</span>%
+<div class="bar"><div id="waterBar" class="fill"></div></div>
+</div>
+
+<div class="stat">
+🫧 Oxygen: <span id="oxygen">80</span>%
+<div class="bar"><div id="oxygenBar" class="fill"></div></div>
+</div>
+
+<div class="stat">
+⚡ Power: <span id="power">80</span>%
+<div class="bar"><div id="powerBar" class="fill"></div></div>
+</div>
+
+</div>
+
+<div id="game">
+
+<button onclick="startGame()">START MISSION 🚀</button>
+
+</div>
+
+<div id="message">
+Welcome, Junior Astronaut!
+</div>
+
 </div>
 
 <script>
-let score = 0;
-let level = 0;
 
-let missions = [
+let resources = {};
+let day = 1;
+let playing = false;
+
+const actions = [
 {
-q: "Your Mars base needs electricity. What will you choose?",
-a: ["Solar Power", "Waste all battery power"],
-correct: 0,
-reason: "Solar panels can provide electrical power."
+name: "🌱 Grow Food",
+description: "Grow food in the greenhouse.",
+effect: {food: 25, power: -8}
 },
 {
-q: "How will you grow food on Mars?",
-a: ["Use a controlled greenhouse", "Depend only on food delivery"],
-correct: 0,
-reason: "A greenhouse can support food production."
+name: "💧 Recycle Water",
+description: "Recycle water for the crew.",
+effect: {water: 25, power: -8}
 },
 {
-q: "How will you protect astronauts from radiation?",
-a: ["Use suitable protective shielding", "Ignore radiation"],
-correct: 0,
-reason: "Radiation shielding helps protect astronauts."
+name: "🫧 Oxygen System",
+description: "Produce oxygen for astronauts.",
+effect: {oxygen: 25, power: -12}
 },
 {
-q: "What is important for astronaut life support?",
-a: ["Monitor air and water systems", "Ignore system conditions"],
-correct: 0,
-reason: "Life-support systems need continuous monitoring."
+name: "☀️ Solar Panels",
+description: "Collect energy from sunlight.",
+effect: {power: 30}
 }
 ];
 
 function startGame() {
-score = 0;
-level = 0;
-showMission();
+resources = {
+food: 80,
+water: 80,
+oxygen: 80,
+power: 80
+};
+
+day = 1;
+playing = true;
+
+document.getElementById("message").innerText =
+"Your Mars mission has started!";
+
+update();
+showActions();
 }
 
-function showMission() {
-document.getElementById("status").innerHTML =
-"⭐ Score: " + score;
+function update() {
 
-if (level >= missions.length) {
-document.getElementById("game").innerHTML =
-"<h2>🎉 Mission Completed!</h2>" +
-"<h3>Your Score: " + score + "/4</h3>" +
-"<p>Great work, Junior Astronaut!</p>" +
-"<button onclick='startGame()'>PLAY AGAIN</button>";
+for (let key in resources) {
+
+resources[key] = Math.max(
+0, Math.min(100, resources[key])
+);
+
+document.getElementById(key).innerText =
+resources[key];
+
+document.getElementById(key + "Bar").style.width =
+resources[key] + "%";
+}
+
+document.getElementById("day").innerText =
+"📅 Mars Day " + day + " / 5";
+}
+
+function showActions() {
+
+let html = "<h3>Choose Today's Action</h3>";
+
+actions.forEach((action, index) => {
+
+html += `
+<button class="action"
+onclick="performAction(${index})">
+${action.name}<br>
+<small>${action.description}</small>
+</button>
+`;
+
+});
+
+document.getElementById("game").innerHTML = html;
+}
+
+function performAction(index) {
+
+if (!playing) return;
+
+let action = actions[index];
+
+for (let key in action.effect) {
+resources[key] += action.effect[key];
+}
+
+resources.food -= 8;
+resources.water -= 8;
+resources.oxygen -= 8;
+resources.power -= 5;
+
+for (let key in resources) {
+resources[key] = Math.max(
+0, Math.min(100, resources[key])
+);
+}
+
+document.getElementById("message").innerText =
+action.description + " Daily resources consumed.";
+
+update();
+
+if (Object.values(resources).some(value => value <= 0)) {
+endGame(false);
 return;
 }
 
-let m = missions[level];
-
-document.getElementById("game").innerHTML =
-"<h3>Mission " + (level+1) + "</h3>" +
-"<p>" + m.q + "</p>" +
-m.a.map((answer,i) =>
-"<button onclick='choose(" + i + ")'>" +
-answer + "</button>"
-).join("");
+if (day === 5) {
+endGame(true);
+return;
 }
 
-function choose(choice) {
-let m = missions[level];
+day++;
+showActions();
+}
 
-if (choice === m.correct) {
-score++;
-alert("Correct! " + m.reason);
+function endGame(success) {
+
+playing = false;
+
+let score = Object.values(resources).reduce(
+(total, value) => total + value, 0
+);
+
+if (success) {
+
+document.getElementById("game").innerHTML = `
+<h2>🎉 MISSION SUCCESSFUL!</h2>
+<h3>You survived 5 days on Mars!</h3>
+<h2>⭐ Score: ${score}/400</h2>
+<button onclick="startGame()">PLAY AGAIN</button>
+`;
+
+document.getElementById("message").innerText =
+"Excellent work, Junior Astronaut!";
+
 } else {
-alert("Not quite! " + m.reason);
+
+document.getElementById("game").innerHTML = `
+<h2>Mission Failed!</h2>
+<p>One or more resources ran out.</p>
+<h3>Score: ${score}/400</h3>
+<button onclick="startGame()">TRY AGAIN</button>
+`;
+
+document.getElementById("message").innerText =
+"Manage your resources more carefully next time.";
 }
 
-level++;
-showMission();
 }
+
 </script>
 
 </body>
